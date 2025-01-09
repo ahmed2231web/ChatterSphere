@@ -113,16 +113,7 @@ Visit `http://localhost:8000` in your browser! 🎉
   - WebSocket Protocol
   - Asynchronous Gateway Interface (ASGI)
   - Channel Layers
-
-### Login Page
-[Login Screenshot]
-
-### Chat Room
-[Chat Room Screenshot]
-
-### Create/Join Room
-[Room Creation Screenshot]
-
+  
 </details>
 </div>
 
