@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat Room - {{ room_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        .chat-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #007bff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        #chat-messages {
+            height: calc(100vh - 300px);
+            overflow-y: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            position: relative;
+        }
+        .message.sent {
+            background: #0084ff;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .message.received {
+            background: #e9ecef;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .message img {
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+        .timestamp {
+            font-size: 0.75em;
+            margin-top: 5px;
+        }
+        .message.sent .timestamp {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .message.received .timestamp {
+            color: #6c757d;
+        }
+        .input-area {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview-image {
+            max-width: 100px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .message-image {
+            max-width: 300px;
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .message-image:hover {
+            transform: scale(1.02);
+        }
+        .image-container {
+            margin: 10px 0;
+            position: relative;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            transition: color 0.2s ease;
+            padding: 10px;
+        }
+        .modal-close:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 10px;
+            }
+            #chat-messages {
+                height: calc(100vh - 350px);
+            }
+            .message {
+                max-width: 90%;
+            }
+            .header-bar {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            .message-image {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header-bar">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ username|make_list|first|upper }}
+                </div>
+                <div>
+                    <h5 class="mb-0">{{ username }}</h5>
+                    <small class="text-muted">Room: {{ room_name }}</small>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'chat_home' %}" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fas fa-home"></i> Rooms
+                </a>
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="chat-messages">
+            {% for message in messages %}
+                <div class="message {% if message.sender.username == username %}sent{% else %}received{% endif %}">
+                    <strong>{{ message.sender.username }}</strong>
+                    {% if message.message %}
+                        <p class="mb-1">{{ message.message }}</p>
+                    {% endif %}
+                    {% if message.image %}
+                        <div class="image-container">
+                            <img src="{{ message.image.url }}" alt="Shared image" class="message-image" onclick="openImageModal(this.src)">
+                        </div>
+                    {% endif %}
+                    <div class="timestamp">{{ message.timestamp|date:"M d, Y H:i" }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="input-area">
+            <div class="mb-3">
+                <textarea id="chat-message-input" class="form-control" placeholder="Type your message..." rows="2"></textarea>
+            </div>
+            <div class="row g-2">
+                <div class="col">
+                    <div class="input-group">
+                        <input type="file" id="chat-file-input" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button id="send-message" class="btn btn-primary btn-icon">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+            <div id="image-preview" class="mt-2"></div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close" onclick="closeImageModal()">&times;</span>
+        <img class="modal-content" id="modalImage" onclick="event.stopPropagation()">
+    </div>
+
+    {{ room_name|json_script:"room-name" }}
+    {{ username|json_script:"username" }}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure modal is hidden on page load
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        });
+
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const username = JSON.parse(document.getElementById('username').textContent);
+        
+        const chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+        );
+
+        const chatMessages = document.querySelector('#chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(data.sender === username ? 'sent' : 'received');
+            
+            let messageContent = `<strong>${data.sender}</strong>`;
+            
+            if (data.image) {
+                messageContent += `
+                    <div class="image-container">
+                        <img src="${data.image}" alt="Shared image" class="message-image" onclick="openImageModal(this.src)">
+                    </div>`;
+            }
+
+            if (data.message) {
+                messageContent += `<p class="mb-1">${data.message}</p>`;
+            }
+            
+            messageContent += `<div class="timestamp">${new Date().toLocaleString()}</div>`;
+            
+            messageElement.innerHTML = messageContent;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // Handle message and image sending
+        document.querySelector('#send-message').onclick = async function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const fileInput = document.querySelector('#chat-file-input');
+            const message = messageInputDom.value.trim();
+            
+            if (!message && !fileInput.files.length) {
+                return; // Don't send if both are empty
+            }
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    chatSocket.send(JSON.stringify({
+                        'message': message,
+                        'sender': username,
+                        'image': e.target.result
+                    }));
+                    
+                    // Clear inputs after sending
+                    messageInputDom.value = '';
+                    fileInput.value = '';
+                    document.querySelector('#image-preview').innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Send message only
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'sender': username
+                }));
+                messageInputDom.value = '';
+            }
+        };
+
+        // Image preview
+        document.querySelector('#chat-file-input').onchange = function(e) {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('#image-preview').innerHTML = `
+                        <div class="image-container">
+                            <img src="${e.target.result}" class="message-image" alt="Preview">
+                        </div>`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.querySelector('#image-preview').innerHTML = '';
+            }
+        };
+
+        // Enter key to send message
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13 && !e.shiftKey) {  // enter key without shift
+                e.preventDefault();
+                document.querySelector('#send-message').click();
+            }
+        };
+
+        // Auto-scroll to bottom when window is resized
+        window.addEventListener('resize', function() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        // Image Modal Functions
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = imageSrc;
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+
+            // Add click event to close modal when clicking outside the image
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeImageModal();
+                }
+            };
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+
+        // Close modal with escape key and handle clicks
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeImageModal();
+            }
+        });
+
+        // Prevent modal from closing when clicking the image
+        document.getElementById('modalImage').onclick = function(e) {
+            e.stopPropagation();
+        };
+
+        // Make sure close button works
+        document.querySelector('.modal-close').onclick = closeImageModal;
+    </script>
+</body>
+</html>

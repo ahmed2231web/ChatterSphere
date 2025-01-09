@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat Rooms</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-container {
+            max-width: 500px;
+            width: 90%;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chat-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .chat-header img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.5rem;
+        }
+        .chat-header h1 {
+            color: #1a73e8;
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        .chat-header p {
+            color: #666;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            border: 2px solid #e1e3e6;
+            transition: all 0.3s ease;
+            margin-bottom: 1.25rem;
+        }
+        .form-control:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 0.2rem rgba(26,115,232,0.25);
+        }
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-join {
+            background-color: #1a73e8;
+            color: white;
+        }
+        .btn-create {
+            background-color: #34a853;
+            color: white;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            color: white;
+        }
+        .btn-join:hover {
+            background-color: #1557b0;
+        }
+        .btn-create:hover {
+            background-color: #2d8e47;
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .recent-rooms {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e3e6;
+        }
+        .recent-rooms h5 {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .room-chip {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            background-color: #f8f9fa;
+            border-radius: 20px;
+            color: #1a73e8;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e1e3e6;
+        }
+        .room-chip:hover {
+            background-color: #e8f0fe;
+            border-color: #1a73e8;
+        }
+        .room-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .room-actions > div {
+            flex: 1;
+        }
+        .divider {
+            text-align: center;
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+            color: #666;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e3e6;
+            z-index: 0;
+        }
+        @media (max-width: 576px) {
+            .chat-container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            .chat-header h1 {
+                font-size: 1.75rem;
+            }
+            .room-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMyIDU2QzQ1LjI1NDggNTYgNTYgNDUuMjU0OCA1NiAzMkM1NiAxOC43NDUyIDQ1LjI1NDggOCAzMiA4QzE4Ljc0NTIgOCA4IDE4Ljc0NTIgOCAzMkM4IDM3LjcwNzIgMTAuMDI5NiA0Mi45NzQ0IDEzLjQzNDQgNDdMOC41MTk5MiA1NS40OEMxMC42NjcyIDU1LjgyMDggMTIuODk2IDU2IDMyIDU2WiIgZmlsbD0iIzE4NzNFOCIvPgo8cGF0aCBkPSJNMzIgNDhDNDAuODM2NiA0OCA0OCA0MC44MzY2IDQ4IDMyQzQ4IDIzLjE2MzQgNDAuODM2NiAxNiAzMiAxNkMyMy4xNjM0IDE2IDE2IDIzLjE2MzQgMTYgMzJDMTYgMzUuODUzNiAxNy41MTQ4IDM5LjM4NzIgMjAuMDE3MiA0MkwxNi43NiA0Ny43NEMxOC4xMzM2IDQ3LjkxMDQgMTkuNTQ4IDQ4IDMyIDQ4WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==" alt="Chat Icon">
+            <h1>Chat Rooms</h1>
+            <p>Join or create a chat room</p>
+        </div>
+
+        <div class="room-actions">
+            <div>
+                <button type="button" class="btn btn-create" onclick="showCreateRoom()">
+                    <i class="fas fa-plus"></i>
+                    Create Room
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-join" onclick="showJoinRoom()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Join Room
+                </button>
+            </div>
+        </div>
+
+        <div id="createRoomForm" style="display: none;">
+            <div class="divider">
+                <span>Create a New Room</span>
+            </div>
+            <form onsubmit="handleCreateRoom(event)">
+                <input type="text" id="create-room-input" class="form-control" 
+                       placeholder="Enter new room name..." required
+                       pattern="[a-zA-Z0-9-_]+" 
+                       title="Only letters, numbers, hyphens and underscores allowed">
+                <button type="submit" class="btn btn-create">
+                    <i class="fas fa-plus"></i>
+                    Create & Join Room
+                </button>
+            </form>
+        </div>
+
+        <div id="joinRoomForm" style="display: none;">
+            <div class="divider">
+                <span>Join Existing Room</span>
+            </div>
+            <form onsubmit="handleJoinRoom(event)">
+                <input type="text" id="join-room-input" class="form-control" 
+                       placeholder="Enter room name..." required
+                       pattern="[a-zA-Z0-9-_]+" 
+                       title="Only letters, numbers, hyphens and underscores allowed">
+                <button type="submit" class="btn btn-join">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Join Room
+                </button>
+            </form>
+        </div>
+
+        <div class="recent-rooms">
+            <h5>RECENT ROOMS</h5>
+            <div id="recent-rooms-list">
+                <!-- Recent rooms will be added here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/Hide forms
+        function showCreateRoom() {
+            document.getElementById('createRoomForm').style.display = 'block';
+            document.getElementById('joinRoomForm').style.display = 'none';
+            document.getElementById('create-room-input').focus();
+        }
+
+        function showJoinRoom() {
+            document.getElementById('createRoomForm').style.display = 'none';
+            document.getElementById('joinRoomForm').style.display = 'block';
+            document.getElementById('join-room-input').focus();
+        }
+
+        // Handle room creation
+        function handleCreateRoom(e) {
+            e.preventDefault();
+            let roomName = document.getElementById('create-room-input').value.trim();
+            if (roomName) {
+                saveRecentRoom(roomName);
+                window.location.pathname = '/chat/' + roomName + '/';
+            }
+        }
+
+        // Handle room joining
+        function handleJoinRoom(e) {
+            e.preventDefault();
+            let roomName = document.getElementById('join-room-input').value.trim();
+            if (roomName) {
+                saveRecentRoom(roomName);
+                window.location.pathname = '/chat/' + roomName + '/';
+            }
+        }
+
+        // Recent rooms functionality
+        function saveRecentRoom(roomName) {
+            let recentRooms = JSON.parse(localStorage.getItem('recentRooms') || '[]');
+            recentRooms = [roomName, ...recentRooms.filter(room => room !== roomName)];
+            recentRooms = recentRooms.slice(0, 5);
+            localStorage.setItem('recentRooms', JSON.stringify(recentRooms));
+        }
+
+        function loadRecentRooms() {
+            let recentRooms = JSON.parse(localStorage.getItem('recentRooms') || '[]');
+            let container = document.getElementById('recent-rooms-list');
+            container.innerHTML = recentRooms.map(room => `
+                <span class="room-chip" onclick="joinRoom('${room}')">
+                    ${room}
+                </span>
+            `).join('');
+        }
+
+        function joinRoom(roomName) {
+            window.location.pathname = '/chat/' + roomName + '/';
+        }
+
+        // Load recent rooms on page load
+        document.addEventListener('DOMContentLoaded', loadRecentRooms);
+    </script>
+</body>
+</html>

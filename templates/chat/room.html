@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+</head>
+<body>
+    <h1>Room: {{ room_name }}</h1>
+    <div id="chat-log">
+        {% for message in messages %}
+            <div>
+                <strong>{{ message.sender.username }}:</strong>
+                {{ message.message }}
+                {% if message.image %}
+                    <img src="{{ message.image.url }}" alt="Chat Image" style="max-width: 200px;">
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    <input id="chat-message-input" type="text" size="100">
+    <input id="chat-image-input" type="file" accept="image/*">
+    <input id="chat-message-submit" type="button" value="Send">
+    <script>
+        const roomName = "{{ room_name }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').innerHTML += (
+                `<div><strong>${data.sender}:</strong> ${data.message}</div>`
+            );
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInput = document.querySelector('#chat-message-input');
+            const imageInput = document.querySelector('#chat-image-input');
+            const message = messageInput.value;
+            const image = imageInput.files[0];
+
+            if (message || image) {
+                const formData = new FormData();
+                formData.append('message', message);
+                if (image) formData.append('image', image);
+
+                fetch('/send_message/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(response => response.json())
+                  .then(data => {
+                      chatSocket.send(JSON.stringify({
+                          'message': message,
+                          'sender': '{{ request.user.username }}',
+                          'image': data.image_url
+                      }));
+                  });
+            }
+            messageInput.value = '';
+            imageInput.value = '';
+        };
+    </script>
+</body>
+</html>
