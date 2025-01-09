@@ -10,7 +10,7 @@
 
 *A modern, real-time chat application built with Django and WebSockets* 🚀
 
-[Live Demo](#) · [Report Bug](#) · [Request Feature](#)
+[Report Bug](#) · [Request Feature](#)
 
 </div>
 
