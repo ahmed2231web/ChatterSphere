@@ -7,7 +7,6 @@
 [![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![WebSocket](https://img.shields.io/badge/WebSocket-Enabled-brightgreen.svg)](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
-[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 *A modern, real-time chat application built with Django and WebSockets* 🚀
 
@@ -117,12 +116,6 @@ Visit `http://localhost:8000` in your browser! 🎉
   - Asynchronous Gateway Interface (ASGI)
   - Channel Layers
 
-## 📱 Screenshots
-
-<div align="center">
-<details>
-<summary>Click to view screenshots</summary>
-
 ### Login Page
 [Login Screenshot]
 
@@ -163,9 +156,9 @@ Contributions are welcome! Here's how you can help:
 
 ## 📬 Contact
 
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
+Your Name - Ahmed
 
-Project Link: [https://github.com/yourusername/ChatterSphere](https://github.com/yourusername/ChatterSphere)
+Project Link: [https://github.com/ahmed2231web/ChatterSphere](https://github.com/ahmed2231web/ChatterSphere)
 
 ---
 
@@ -173,6 +166,6 @@ Project Link: [https://github.com/yourusername/ChatterSphere](https://github.com
 
 ### ⭐ Star this repo if you like it!
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by Ahmed
 
 </div>
