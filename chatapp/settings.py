@@ -116,6 +116,17 @@ CHANNEL_LAYERS = {
     }
 }
 
+'''
+'BACKEND':
+    This key specifies the backend implementation of the channel layer. The backend is responsible for managing the communication between different consumers and handling message passing.
+
+'channels.layers.InMemoryChannelLayer':
+    . This value indicates that the application will use the InMemoryChannelLayer provided by Django Channels. 
+
+    . The InMemoryChannelLayer is a simple, in-memory backend that is useful for development and testing. It stores messages in memory and does not persist them, which means that if the server restarts, all messages will be lost. 
+
+    . This backend is suitable for small-scale applications or during the development phase. For production use, you would typically want to use a more robust backend like Redis or RabbitMQ, which can handle message persistence and scaling.
+'''
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

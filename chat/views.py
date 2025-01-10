@@ -24,29 +24,22 @@ def register_view(request):
     return render(request, 'registration/register.html')
 
 def login_view(request):
-    print("Login view called")  # Debug print
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        
-        print(f"Login attempt for email: {email}")  # Debug print
         
         if not email or not password:
             return render(request, 'registration/login.html', {'error': 'Please fill in all fields'})
         
         try:
             user = User.objects.get(email=email)
-            print(f"Found user: {user.username}")  # Debug print
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
-                print("Authentication successful")  # Debug print
                 login(request, user)
                 return redirect('chat_home')
             else:
-                print("Authentication failed")  # Debug print
                 return render(request, 'registration/login.html', {'error': 'Invalid password'})
         except User.DoesNotExist:
-            print(f"No user found with email: {email}")  # Debug print
             return render(request, 'registration/login.html', {'error': 'No account found with this email'})
 
     return render(request, 'registration/login.html')

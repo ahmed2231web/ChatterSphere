@@ -11,3 +11,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('chat/', include('chat.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+'''The line static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) sets up a URL route in your Django application that allows users to access media files stored on the server. When a user accesses a URL that starts with MEDIA_URL, Django will serve the corresponding file from the directory specified by MEDIA_ROOT. This is particularly useful for handling user-uploaded content, such as images or documents, during development.'''
